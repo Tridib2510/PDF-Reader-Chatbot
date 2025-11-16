@@ -1,0 +1,15 @@
+langchain
+python_dotenv
+langchain_groq
+bs4
+langchain_chroma
+langchain_community
+langchain_core
+langchain_openai
+langchain_text_splitters
+langchain_huggingface
+sentence-transformers
+langchain_classic
+uvicorn
+fastapi
+pypdf
