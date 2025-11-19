@@ -10,6 +10,8 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+
 
 loaders=PyPDFLoader('Operating Systems Course for Beginners.pdf')
 docs=loaders.load()
@@ -101,14 +103,6 @@ conversational_rag_chain=RunnableWithMessageHistory(
     output_messages_key="answer"
 )
 
-conversational_rag_chain.invoke(
-    {"input":"My name is Tridib"},
-    config={
-        'configurable':{"session_id":"abc123"}
-
-    }
-)["answer"]
-
 response=conversational_rag_chain.invoke(
     {"input":"What is my name"},
     config={
@@ -119,7 +113,13 @@ response=conversational_rag_chain.invoke(
 
 app = FastAPI(title="RAG Chat API")
 
-app = FastAPI(title="RAG Chat API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ChatRequest(BaseModel):

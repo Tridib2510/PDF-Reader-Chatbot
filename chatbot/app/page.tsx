@@ -23,6 +23,7 @@ interface Persona {
 const PersonaChat = () => {
   const [selectedPersona, setSelectedPersona] = useState<string>('Hitesh Choudhary');
   const [message, setMessage] = useState<string>('');
+  const[userMessage,setUserMessage]=useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
 
   const personas: Persona[] = [
@@ -68,13 +69,30 @@ const PersonaChat = () => {
       };
 
       setMessages((prev) => [...prev, newMessage]);
+      setUserMessage(newMessage.text);
       setMessage('');
 
       // Simulate AI response
-      setTimeout(() => {
+      setTimeout(async() => {
+        console.log('Sending message to AI:', userMessage);
+       console.log(userMessage)
+        const res= await fetch('http://127.0.0.1:8000/chat',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({
+            "session_id": "abc123",
+             "query": `${newMessage.text}`
+          })
+        });
+       const answer=await res.json()
+
+       console.log(answer)
+
         const aiResponse: Message = {
           id: Date.now() + 1,
-          text: `Thanks for your message! I'm ${selectedPersona}, and I'm here to help you.`,
+          text: `${answer.answer}`,
           sender: 'ai',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
@@ -89,22 +107,7 @@ const PersonaChat = () => {
       <div className="w-64 bg-neutral-950 border-r border-neutral-800 p-4">
         <h2 className="text-xl font-bold mb-6">Select Persona</h2>
         <div className="space-y-2">
-          {personas.map((persona) => (
-            <button
-              key={persona.name}
-              onClick={() => setSelectedPersona(persona.name)}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
-                selectedPersona === persona.name
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300'
-              }`}
-            >
-              <div className={`w-10 h-10 rounded-full ${persona.color} flex items-center justify-center text-2xl`}>
-                {persona.avatar}
-              </div>
-              <span className="font-medium text-left">{persona.name}</span>
-            </button>
-          ))}
+         
         </div>
       </div>
 
