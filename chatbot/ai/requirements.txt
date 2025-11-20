@@ -13,3 +13,4 @@ langchain_classic
 uvicorn
 fastapi
 pypdf
+chromadb

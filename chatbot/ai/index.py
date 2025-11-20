@@ -125,11 +125,39 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     session_id: str
     query: str
- 
+
+@app.post("/load_pdf")
+def load_pdf(file_path: str,user_id:str):
+   print(f"Loading PDF from path: {file_path}")
+   loaders = PyPDFLoader(file_path)
+   docs = loaders.load()
+   split=splitter.split_documents(docs)
+   vectordb=Chroma(
+         collection_name=user_id,
+         embedding_function=embedding
+   )
+   vectordb.add_documents(split)
+   return "Request successfully processed."
+
+def create_retrieval_chain_endpoint(retriever: Chroma):
+    history_aware_retriever= create_history_aware_retriever(llm,retriever,contextualize_q_prompts)
+    question_answer_chain=create_stuff_documents_chain(llm,qa_prompt)
+    rag_chain=create_retrieval_chain(history_aware_retriever,question_answer_chain)
+    conversational_rag_chain=RunnableWithMessageHistory(
+    rag_chain,
+    get_history,
+    input_messages_key="input",
+    history_messages_key="chat_history",
+    output_messages_key="answer"
+)
+    return conversational_rag_chain
+    
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-    response = conversational_rag_chain.invoke(
+    retriever=vectordb.as_retriever()
+    conversational_rag_chain= create_retrieval_chain_endpoint(retriever)
+    response =  conversational_rag_chain.invoke(
         {"input": request.query},
         config={
             "configurable": {"session_id": request.session_id}
