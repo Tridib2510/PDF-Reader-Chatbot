@@ -22,7 +22,7 @@ const PersonaChat = () => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
-
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
   const personas: Persona[] = [
     {
       name: "Hitesh Choudhary",
@@ -75,7 +75,7 @@ const PersonaChat = () => {
     setMessages((prev) => [...prev, newMessage]);
     setMessage("");
 
-    const res = await fetch("http://127.0.0.1:8000/chat?user_id=abc123", {
+    const res = await fetch(`${BACKEND_URL}/chat?user_id=abc123`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -98,7 +98,7 @@ const PersonaChat = () => {
   return (
     <div className="flex h-screen bg-neutral-900 text-white">
       <div className="w-64 bg-neutral-950 border-r border-neutral-800 p-4">
-        <h2 className="text-xl font-bold mb-6">Select Persona</h2>
+        
       </div>
 
       <div className="flex-1 flex flex-col">
@@ -108,17 +108,17 @@ const PersonaChat = () => {
               {selected?.avatar}
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{selected?.name}</h1>
-              <p className="text-neutral-400">{selected?.title}</p>
+              <h1 className="text-2xl font-bold">PDF ASSISTANT</h1>
+              <p className="text-neutral-400">Get Your Answers Based on PDF</p>
             </div>
           </div>
-          <p className="mt-4 text-neutral-300">{selected?.description}</p>
+          {/* <p className="mt-4 text-neutral-300">{selected?.description}</p> */}
         </div>
 
         <div className="flex-1 p-6 overflow-y-auto">
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-neutral-500">
-              Start a conversation with {selected?.name}
+            Start the conversation by typing a message below.
             </div>
           ) : (
             <div className="space-y-4">

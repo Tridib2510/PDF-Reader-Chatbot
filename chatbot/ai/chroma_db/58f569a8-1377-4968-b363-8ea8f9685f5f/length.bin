@@ -1,0 +1,9 @@
+4. CatBoost Classifier 
+Why we used it: 
+• Designed to handle categorical features automatically (like gender, age group, response 
+types) 
+• Requires less preprocessing 
+• Performs well out of the box with minimal tuning 
+• Handles imbalanced and noisy data effectively 
+Ideal for: 
+• Real-world data that’s messy or includes non-numeric responses (e.g., “Often,” “Rarely”) \n \n

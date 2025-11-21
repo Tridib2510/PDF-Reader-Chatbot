@@ -3,6 +3,7 @@ import React, { useState } from "react";
 // --------------------------------------------------------
 // PDF UPLOAD MODAL (FINAL VERSION: drag + drop + browse)
 // --------------------------------------------------------
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const PDFUploadModal = ({
   isOpen,
@@ -45,7 +46,7 @@ const PDFUploadModal = ({
   const formData = new FormData();
   formData.append("pdf", file);
    
-  const res = await fetch(`http://127.0.0.1:8000/load_pdf?id=${userId}`, {
+  const res = await fetch(`${BACKEND_URL}/load_pdf?id=${userId}`, {
     method: "POST",
     body: formData, // ⚠️ no headers required for multipart
   });

@@ -23,7 +23,11 @@ split=splitter.split_documents(docs)
 
 embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-vectordb=Chroma.from_documents(documents=split,embedding=embedding)
+vectordb=Chroma(
+         collection_name=id,
+         embedding_function=embedding,
+         persist_directory="chroma_db"
+   )
 
 retriever=vectordb.as_retriever()
 
@@ -143,6 +147,14 @@ async def load_pdf(
    loaders = PyPDFLoader(file_path)
    docs = loaders.load()
    split=splitter.split_documents(docs)
+   client = Chroma(persist_directory="chroma_db")
+   existing = client._client.list_collections()
+
+    # Remove if exists
+   if any(c.name == id for c in existing):
+        print("Collection exists — deleting")
+        client._client.delete_collection(name=id)
+        
    vectordb=Chroma(
          collection_name=id,
          embedding_function=embedding,
