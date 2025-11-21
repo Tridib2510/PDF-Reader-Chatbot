@@ -60,18 +60,10 @@ const PersonaChat = () => {
   const handlePDFUpload = async (file: File) => {
     const formData = new FormData();
     formData.append("pdf", file);
-
-    const res = await fetch("http://127.0.0.1:8000/upload-pdf", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-    console.log("PDF Uploaded:", data);
   };
 
   const handleSend = async () => {
-    if (!message.trim()) return;
+    if (!message.trim()) return; 
 
     const newMessage: Message = {
       id: Date.now(),
@@ -83,7 +75,7 @@ const PersonaChat = () => {
     setMessages((prev) => [...prev, newMessage]);
     setMessage("");
 
-    const res = await fetch("http://127.0.0.1:8000/chat", {
+    const res = await fetch("http://127.0.0.1:8000/chat?user_id=abc123", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -178,7 +170,7 @@ const PersonaChat = () => {
       <PDFUploadModal
         isOpen={isPDFModalOpen}
         onClose={() => setIsPDFModalOpen(false)}
-        onUpload={handlePDFUpload}
+        
       />
     </div>
   );

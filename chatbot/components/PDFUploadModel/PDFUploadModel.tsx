@@ -7,11 +7,10 @@ import React, { useState } from "react";
 const PDFUploadModal = ({
   isOpen,
   onClose,
-  onUpload,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (file: File) => void;
+  
 }) => {
   const [file, setFile] = React.useState<File | null>(null);
 
@@ -39,7 +38,31 @@ const PDFUploadModal = ({
       alert("Please select a PDF first.");
       return;
     }
-    onUpload(file);
+      const fileUrl = URL.createObjectURL(file);
+      console.log("Uploaded PDF URL:", fileUrl);
+  
+  const uploadPDF = async (file: File, userId: string) => {
+  const formData = new FormData();
+  formData.append("pdf", file);
+   
+  const res = await fetch(`http://127.0.0.1:8000/load_pdf?id=${userId}`, {
+    method: "POST",
+    body: formData, // ⚠️ no headers required for multipart
+  });
+
+  if (!res.ok) {
+    throw new Error(`Upload failed: ${res.status}`);
+  }
+
+  const data = await res.json();
+  console.log("Server response:", data);
+};
+
+uploadPDF(file, "abc123").catch((err) => {
+  console.error("Error uploading PDF:", err);
+});
+
+   
     setFile(null);
     onClose();
   };

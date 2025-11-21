@@ -11,7 +11,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-
+import tempfile
+from fastapi import UploadFile, File, Form
 
 loaders=PyPDFLoader('Operating Systems Course for Beginners.pdf')
 docs=loaders.load()
@@ -123,18 +124,29 @@ app.add_middleware(
 
 
 class ChatRequest(BaseModel):
+    
     session_id: str
     query: str
 
 @app.post("/load_pdf")
-def load_pdf(file_path: str,user_id:str):
+async def load_pdf(
+    id :str,
+    pdf: UploadFile = File(...)
+   
+
+):
+   with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
+         temp_pdf.write(await pdf.read())
+         file_path = temp_pdf.name
+
    print(f"Loading PDF from path: {file_path}")
    loaders = PyPDFLoader(file_path)
    docs = loaders.load()
    split=splitter.split_documents(docs)
    vectordb=Chroma(
-         collection_name=user_id,
-         embedding_function=embedding
+         collection_name=id,
+         embedding_function=embedding,
+         persist_directory="chroma_db"
    )
    vectordb.add_documents(split)
    return "Request successfully processed."
@@ -154,7 +166,14 @@ def create_retrieval_chain_endpoint(retriever: Chroma):
     
 
 @app.post("/chat")
-def chat(request: ChatRequest):
+def chat(
+    user_id:str,
+    request: ChatRequest):
+    vectordb = Chroma(
+        collection_name=user_id,
+        embedding_function=embedding,
+        persist_directory="chroma_db"
+    )
     retriever=vectordb.as_retriever()
     conversational_rag_chain= create_retrieval_chain_endpoint(retriever)
     response =  conversational_rag_chain.invoke(
@@ -168,4 +187,4 @@ def chat(request: ChatRequest):
 
 @app.get("/")
 def root():
-    return {"message": "RAG FastAPI server running!"}
+    return {"message": "RAG FastAPI server running!"} 
