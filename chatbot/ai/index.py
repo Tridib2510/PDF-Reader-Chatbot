@@ -14,12 +14,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import tempfile
 from fastapi import UploadFile, File, Form
 
-loaders=PyPDFLoader('Operating Systems Course for Beginners.pdf')
-docs=loaders.load()
-
-splitter=RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
-
-split=splitter.split_documents(docs)
 
 embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
