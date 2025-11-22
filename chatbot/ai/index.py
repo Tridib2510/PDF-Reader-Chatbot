@@ -14,17 +14,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import tempfile
 from fastapi import UploadFile, File, Form
 
-
-embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
-vectordb=Chroma(
-         collection_name=id,
-         embedding_function=embedding,
-         persist_directory="chroma_db"
-   )
-
-retriever=vectordb.as_retriever()
-
 llm=ChatGroq(groq_api_key=groq_api_key,model_name="llama-3.1-8b-instant")
 
 from langchain_classic.chains import create_retrieval_chain
@@ -51,10 +40,6 @@ qa_prompt=ChatPromptTemplate.from_messages(
     ]
 )
 
-document_chain=create_stuff_documents_chain(llm,qa_prompt)
-
-rag_chain=create_retrieval_chain(retriever,document_chain)
-
 from langchain_classic.chains import create_history_aware_retriever
 from langchain_core.prompts import MessagesPlaceholder
 
@@ -75,12 +60,6 @@ contextualize_q_prompts=ChatPromptTemplate.from_messages(
     ]
 )
 
-history_aware_retriever=create_history_aware_retriever(llm,retriever,contextualize_q_prompts)
-
-question_answer_chain=create_stuff_documents_chain(llm,qa_prompt)
-
-rag_chain=create_retrieval_chain(history_aware_retriever,question_answer_chain)
-
 from langchain_community import chat_message_histories
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -93,22 +72,6 @@ def get_history(id:str)->BaseChatMessageHistory:
     store[id]=ChatMessageHistory()
 
   return store[id]
-
-conversational_rag_chain=RunnableWithMessageHistory(
-    rag_chain,
-    get_history,
-    input_messages_key="input",
-    history_messages_key="chat_history",
-    output_messages_key="answer"
-)
-
-response=conversational_rag_chain.invoke(
-    {"input":"What is my name"},
-    config={
-        'configurable':{"session_id":"abc123"}
-
-    }
-)["answer"]
 
 app = FastAPI(title="RAG Chat API")
 
@@ -133,6 +96,8 @@ async def load_pdf(
    
 
 ):
+   embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+   splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
          temp_pdf.write(await pdf.read())
          file_path = temp_pdf.name
@@ -175,6 +140,7 @@ def create_retrieval_chain_endpoint(retriever: Chroma):
 def chat(
     user_id:str,
     request: ChatRequest):
+    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectordb = Chroma(
         collection_name=user_id,
         embedding_function=embedding,
