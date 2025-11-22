@@ -60,7 +60,7 @@ contextualize_q_prompts=ChatPromptTemplate.from_messages(
     ]
 )
 
-embeddings = HuggingFaceEmbeddings(
+embedding = HuggingFaceEmbeddings(
     model_name="Alibaba-NLP/gte-small-onnx",
     model_kwargs={"device": "cpu"},
     encode_kwargs={"normalize_embeddings": True}
