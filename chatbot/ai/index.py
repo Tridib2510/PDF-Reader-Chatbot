@@ -82,10 +82,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-embedding = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
-    model_kwargs={"device": "cpu"}  # force CPU
-)
+
 
 
 class ChatRequest(BaseModel):
@@ -101,6 +98,10 @@ async def load_pdf(
    
 
 ):
+   embedding = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
+    model_kwargs={"device": "cpu"}  # force CPU
+)
    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
          temp_pdf.write(await pdf.read())
@@ -144,7 +145,10 @@ def create_retrieval_chain_endpoint(retriever: Chroma):
 def chat(
     user_id:str,
     request: ChatRequest):
-    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embedding = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
+    model_kwargs={"device": "cpu"}  # force CPU
+)
     vectordb = Chroma(
         collection_name=user_id,
         embedding_function=embedding,
