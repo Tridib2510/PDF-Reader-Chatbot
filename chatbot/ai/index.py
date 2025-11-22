@@ -82,12 +82,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
 class ChatRequest(BaseModel):
     
     session_id: str
     query: str
+
 
 @app.post("/load_pdf")
 async def load_pdf(
@@ -96,7 +98,6 @@ async def load_pdf(
    
 
 ):
-   embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
          temp_pdf.write(await pdf.read())
