@@ -60,6 +60,13 @@ contextualize_q_prompts=ChatPromptTemplate.from_messages(
     ]
 )
 
+embeddings = HuggingFaceEmbeddings(
+    model_name="Alibaba-NLP/gte-small-onnx",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": True}
+)
+
+
 from langchain_community import chat_message_histories
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -98,10 +105,7 @@ async def load_pdf(
    
 
 ):
-   embedding = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
-    model_kwargs={"device": "cpu"}  # force CPU
-)
+   
    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
          temp_pdf.write(await pdf.read())
@@ -145,10 +149,7 @@ def create_retrieval_chain_endpoint(retriever: Chroma):
 def chat(
     user_id:str,
     request: ChatRequest):
-    embedding = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
-    model_kwargs={"device": "cpu"}  # force CPU
-)
+    
     vectordb = Chroma(
         collection_name=user_id,
         embedding_function=embedding,
