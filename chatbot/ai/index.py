@@ -117,7 +117,7 @@ async def load_pdf(
    vectordb=Chroma(
          collection_name=id,
          embedding_function=embedding,
-         persist_directory="chroma_db"
+        
    )
    vectordb.add_documents(split)
    return "Request successfully processed."
@@ -144,7 +144,7 @@ def chat(
     vectordb = Chroma(
         collection_name=user_id,
         embedding_function=embedding,
-        persist_directory="chroma_db"
+        
     )
     retriever=vectordb.as_retriever()
     conversational_rag_chain= create_retrieval_chain_endpoint(retriever)
